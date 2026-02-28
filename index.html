@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Multi-Step Form</title>
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+
+
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+}
+html, body {
+  width: 100%; height: 100%;
+}
+body {
+  font-family: 'Ubuntu', sans-serif;
+  background-color: #EEF3FB;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+
+.card {
+  display: flex;
+  flex-direction: row;
+  width: 940px;
+  min-height: 560px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 48px rgba(0,0,0,0.10);
+  overflow: hidden;
+}
+
+
+.sidebar {
+  width: 274px;
+  flex-shrink: 0;
+  background: #483EFF;
+  border-radius: 10px;
+  margin: 16px;
+  padding: 40px 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* decorative blobs */
+.sidebar .blob {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0;
+}
+.sidebar .blob-pink {
+  width: 260px; height: 250px;
+  background: #F9818E;
+  bottom: -80px; left: -60px;
+  border-radius: 60% 40% 50% 50%;
+  opacity: 0.92;
+}
+.sidebar .blob-orange {
+  width: 170px; height: 170px;
+  background: #FFAF7E;
+  bottom: -50px; left: 80px;
+  opacity: 0.9;
+}
+
+/* dashes decoration */
+.sidebar .dashes {
+  position: absolute;
+  bottom: 148px; left: 112px;
+  z-index: 1;
+}
+.sidebar .dashes::before,
+.sidebar .dashes::after {
+  content: '';
+  display: block;
+  width: 22px; height: 3px;
+  background: rgba(255,255,255,0.65);
+  border-radius: 2px;
+  transform: rotate(-38deg);
+  margin-bottom: 8px;
+}
+
+/* step items */
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 2;
+}
+.step-item:last-child { margin-bottom: 0; }
+
+.step-num {
+  width: 33px; height: 33px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: #ffffff;
+  flex-shrink: 0;
+  transition: all 0.25s;
+}
+.step-num.active {
+  background: #BEE2FD;
+  border-color: #BEE2FD;
+  color: #022959;
+}
+
+.step-label { display: flex; flex-direction: column; }
+.step-label .step-tag {
+  font-size: 11px; font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+.step-label .step-title {
+  font-size: 13px; font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+
+.content {
+  flex: 1;
+  padding: 56px 100px 40px 100px;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.panel {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+}
+.panel.active { display: flex; }
+
+.panel-title {
+  font-size: 32px; font-weight: 700;
+  color: #022959;
+  margin-bottom: 9px;
+}
+.panel-sub {
+  font-size: 16px;
+  color: #9699AA;
+  margin-bottom: 35px;
+  line-height: 1.5;
+}
+
+
+   /* STEP 1 — Personal Info */
+ 
+.field-group { margin-bottom: 20px; }
+
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+}
+.field-label-row label {
+  font-size: 14px; font-weight: 500;
+  color: #022959;
+}
+.field-error {
+  font-size: 13px; font-weight: 700;
+  color: #EE374A;
+  display: none;
+}
+.field-group.has-error .field-error { display: block; }
+
+.field-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #D6D9E6;
+  border-radius: 8px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 15px; font-weight: 500;
+  color: #022959;
+  outline: none;
+  background: #ffffff;
+  transition: border-color 0.2s;
+  display: block;
+}
+.field-group input::placeholder { color: #9699AA; font-weight: 400; }
+.field-group input:focus { border-color: #483EFF; }
+.field-group.has-error input { border-color: #EE374A; }
+
+
+   /* STEP 2 — Select Plan */
+
+.plan-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.plan-card {
+  border: 1.5px solid #D6D9E6;
+  border-radius: 10px;
+  padding: 20px 16px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s, background 0.2s;
+}
+.plan-card:hover { border-color: #483EFF; }
+.plan-card.selected {
+  border-color: #483EFF;
+  background: #F8F9FF;
+}
+
+.plan-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 40px;
+  flex-shrink: 0;
+}
+.plan-icon.arcade   { background: #FFAF7E; }
+.plan-icon.advanced { background: #F9818E; }
+.plan-icon.pro      { background: #483EFF; }
+
+.plan-name {
+  font-size: 15px; font-weight: 700;
+  color: #022959;
+  margin-bottom: 4px;
+}
+.plan-price { font-size: 13px; color: #9699AA; }
+.plan-free  {
+  font-size: 12px; color: #022959; font-weight: 500;
+  margin-top: 4px; display: none;
+}
+.yearly-mode .plan-free { display: block; }
+
+/* billing toggle bar */
+.billing-toggle-bar {
+  background: #F8F9FF;
+  border-radius: 8px;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.billing-label {
+  font-size: 14px; font-weight: 700;
+  color: #9699AA;
+  transition: color 0.2s;
+}
+.billing-label.active { color: #022959; }
+
+/* toggle switch */
+.toggle-switch { position: relative; width: 38px; height: 20px; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+  position: absolute; inset: 0;
+  background: #022959;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.toggle-track::before {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  background: #ffffff;
+  border-radius: 50%;
+  top: 4px; left: 4px;
+  transition: 0.3s;
+}
+.toggle-switch input:checked + .toggle-track::before {
+  transform: translateX(18px);
+}
+
+   /* STEP 3 — Add-Ons */
+ 
+.addon-item {
+  border: 1.5px solid #D6D9E6;
+  border-radius: 10px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.addon-item:last-of-type { margin-bottom: 0; }
+.addon-item:hover { border-color: #483EFF; }
+.addon-item.checked {
+  border-color: #483EFF;
+  background: #F8F9FF;
+}
+
+.addon-checkbox {
+  width: 20px; height: 20px;
+  border: 1.5px solid #D6D9E6;
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.addon-item.checked .addon-checkbox {
+  background: #483EFF;
+  border-color: #483EFF;
+}
+.addon-checkbox .check-icon { display: none; }
+.addon-item.checked .addon-checkbox .check-icon { display: block; }
+
+.addon-text { flex: 1; }
+.addon-name {
+  font-size: 14px; font-weight: 700;
+  color: #022959; margin-bottom: 3px;
+}
+.addon-desc { font-size: 12px; color: #9699AA; }
+.addon-price { font-size: 13px; color: #483EFF; white-space: nowrap; }
+
+
+   /* STEP 4 — Summary / Finishing Up */
+ 
+.summary-box {
+  background: #F8F9FF;
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 12px;
+}
+.summary-plan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #D6D9E6;
+  margin-bottom: 16px;
+}
+.summary-plan-name {
+  font-size: 14px; font-weight: 700;
+  color: #022959; margin-bottom: 4px;
+}
+.summary-change {
+  font-size: 13px; color: #9699AA;
+  text-decoration: underline;
+  cursor: pointer; display: block;
+}
+.summary-change:hover { color: #483EFF; }
+.summary-plan-price {
+  font-size: 14px; font-weight: 700;
+  color: #022959;
+}
+.summary-addon-row {
+  display: flex; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.summary-addon-row:last-child { margin-bottom: 0; }
+.summary-addon-name { font-size: 14px; color: #9699AA; }
+.summary-addon-price { font-size: 14px; color: #022959; }
+
+.summary-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 24px 0;
+}
+.summary-total-label { font-size: 14px; color: #9699AA; }
+.summary-total-value { font-size: 20px; font-weight: 700; color: #483EFF; }
+
+
+   /* STEP 5 — Thank You */
+
+.thankyou-panel {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+}
+.thankyou-panel.active { display: flex; }
+
+.ty-check {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #F9818E 0%, #FFB8A0 100%);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 32px;
+}
+.thankyou-panel h1 {
+  font-size: 32px; font-weight: 700;
+  color: #022959; margin-bottom: 14px;
+}
+.thankyou-panel p {
+  font-size: 16px; color: #9699AA;
+  line-height: 1.65; max-width: 450px;
+}
+
+
+   /* BUTTON ROW */
+ 
+.btn-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 20px;
+}
+.btn-back {
+  background: none; border: none;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 15px; font-weight: 500;
+  color: #9699AA; cursor: pointer;
+  padding: 8px 0;
+  transition: color 0.2s;
+  visibility: hidden;
+}
+.btn-back.show { visibility: visible; }
+.btn-back:hover { color: #022959; }
+
+.btn-next {
+  background: #022959; color: #ffffff;
+  border: none; border-radius: 8px;
+  padding: 14px 28px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-left: auto;
+}
+.btn-next:hover { opacity: 0.85; }
+
+.btn-confirm {
+  background: #473DFF; color: #ffffff;
+  border: none; border-radius: 8px;
+  padding: 14px 28px;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-left: auto;
+}
+.btn-confirm:hover { opacity: 0.85; }
+
+
+   /* MOBILE  ≤ 680px */
+@media (max-width: 680px) {
+  body { padding: 0; align-items: flex-start; background: #EEF3FB; }
+
+  .card {
+    flex-direction: column;
+    width: 100%; min-height: 100dvh;
+    border-radius: 0; box-shadow: none;
+  }
+
+  /* sidebar → top banner */
+  .sidebar {
+    width: 100%; margin: 0; border-radius: 0;
+    padding: 32px 24px 72px;
+    min-height: 172px;
+  }
+  .sidebar .blob-pink  { width: 180px; height: 160px; bottom: -60px; left: -30px; }
+  .sidebar .blob-orange{ width: 130px; height: 130px; bottom: -50px; left: 90px; }
+  .sidebar .dashes { display: none; }
+
+  /* horizontal step circles only */
+  .step-label { display: none; }
+  .step-item  { margin-bottom: 0; }
+  .step-item + .step-item { margin-left: 0; }
+
+  /* make steps row horizontal */
+  #stepsRow {
+    display: flex !important;
+    flex-direction: row;
+    gap: 16px;
+    justify-content: center;
+  }
+
+  /* content floats over sidebar */
+  .content {
+    padding: 0 16px 110px;
+    margin-top: -40px;
+    position: relative; z-index: 3;
+  }
+
+  .panel, .thankyou-panel {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 28px 20px 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+
+  .panel-title { font-size: 24px; }
+  .panel-sub   { font-size: 14px; margin-bottom: 20px; }
+
+  /* plan cards stack vertically */
+  .plan-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .plan-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 14px;
+  }
+  .plan-icon { margin-bottom: 0; flex-shrink: 0; }
+
+  /* sticky nav */
+  .btn-row {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #ffffff;
+    padding: 16px 24px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+    z-index: 100;
+    margin-top: 0;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  
+       <!-- SIDEBAR -->
+     
+  <aside class="sidebar">
+    <div class="blob blob-pink"></div>
+    <div class="blob blob-orange"></div>
+    <div class="dashes"></div>
+
+    <div id="stepsRow">
+      <div class="step-item">
+        <div class="step-num active" id="sn1">1</div>
+        <div class="step-label">
+          <span class="step-tag">Step 1</span>
+          <span class="step-title">Your Info</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num" id="sn2">2</div>
+        <div class="step-label">
+          <span class="step-tag">Step 2</span>
+          <span class="step-title">Select Plan</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num" id="sn3">3</div>
+        <div class="step-label">
+          <span class="step-tag">Step 3</span>
+          <span class="step-title">Add-Ons</span>
+        </div>
+      </div>
+      <div class="step-item">
+        <div class="step-num" id="sn4">4</div>
+        <div class="step-label">
+          <span class="step-tag">Step 4</span>
+          <span class="step-title">Summary</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+
+       <!-- MAIN CONTENT -->
+      
+  <main class="content">
+
+   
+         <!-- STEP 1 — Personal Info  -->
+      
+    <div class="panel active" id="panel1">
+      <h2 class="panel-title">Personal info</h2>
+      <p  class="panel-sub">Please provide your name, email address, and phone number.</p>
+
+      <div class="field-group" id="fg-name">
+        <div class="field-label-row">
+          <label for="inp-name">Name</label>
+          <span class="field-error">This field is required</span>
+        </div>
+        <input type="text"  id="inp-name"  placeholder="e.g. Stephen King" autocomplete="name" />
+      </div>
+
+      <div class="field-group" id="fg-email">
+        <div class="field-label-row">
+          <label for="inp-email">Email Address</label>
+          <span class="field-error">This field is required</span>
+        </div>
+        <input type="email" id="inp-email" placeholder="e.g. stephenking@lorem.com" autocomplete="email" />
+      </div>
+
+      <div class="field-group" id="fg-phone">
+        <div class="field-label-row">
+          <label for="inp-phone">Phone Number</label>
+          <span class="field-error">This field is required</span>
+        </div>
+        <input type="tel"   id="inp-phone" placeholder="e.g. +1 234 567 890" autocomplete="tel" />
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" id="b1-back">Go Back</button>
+        <button class="btn-next" id="b1-next">Next Step</button>
+      </div>
+    </div>
+
+  
+         <!-- PANEL 2 · Select Plan -->
+        
+    <div class="panel" id="panel2">
+      <h2 class="panel-title">Select your plan</h2>
+      <p  class="panel-sub">You have the option of monthly or yearly billing.</p>
+
+      <div class="plan-cards" id="planGrid">
+
+        <div class="plan-card selected" data-plan="Arcade" data-mo="9" data-yr="90">
+          <div class="plan-icon arcade">
+            <!-- Arcade icon -->
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="14" cy="14" r="12" stroke="white" stroke-width="2"/>
+              <rect x="13" y="7" width="2" height="6" fill="white" rx="1"/>
+              <rect x="13" y="15" width="2" height="6" fill="white" rx="1"/>
+              <rect x="7" y="13" width="6" height="2" fill="white" rx="1"/>
+              <rect x="15" y="13" width="6" height="2" fill="white" rx="1"/>
+            </svg>
+          </div>
+          <div class="plan-name">Arcade</div>
+          <div class="plan-price">$9/mo</div>
+          <div class="plan-free">2 months free</div>
+        </div>
+
+        <div class="plan-card" data-plan="Advanced" data-mo="12" data-yr="120">
+          <div class="plan-icon advanced">
+            <!-- Advanced icon -->
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="11" width="18" height="13" rx="2" stroke="white" stroke-width="2"/>
+              <path d="M10 11V8.5C10 6.57 11.57 5 13.5 5v0C15.43 5 17 6.57 17 8.5V11" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="13.5" cy="17.5" r="2" fill="white"/>
+            </svg>
+          </div>
+          <div class="plan-name">Advanced</div>
+          <div class="plan-price">$12/mo</div>
+          <div class="plan-free">2 months free</div>
+        </div>
+
+        <div class="plan-card" data-plan="Pro" data-mo="15" data-yr="150">
+          <div class="plan-icon pro">
+            <!-- Pro gamepad icon -->
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="9" width="20" height="14" rx="4" stroke="white" stroke-width="2"/>
+              <rect x="8" y="13" width="2" height="5" rx="1" fill="white"/>
+              <rect x="6" y="15" width="6" height="1.8" rx="0.9" fill="white"/>
+              <circle cx="19" cy="14" r="1.2" fill="white"/>
+              <circle cx="19" cy="18" r="1.2" fill="white"/>
+              <circle cx="17" cy="16" r="1.2" fill="white"/>
+              <circle cx="21" cy="16" r="1.2" fill="white"/>
+            </svg>
+          </div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">$15/mo</div>
+          <div class="plan-free">2 months free</div>
+        </div>
+
+      </div>
+
+      <div class="billing-toggle-bar">
+        <span class="billing-label active" id="lbl-mo">Monthly</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="billing-toggle" />
+          <span class="toggle-track"></span>
+        </label>
+        <span class="billing-label" id="lbl-yr">Yearly</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back show" id="b2-back">Go Back</button>
+        <button class="btn-next"      id="b2-next">Next Step</button>
+      </div>
+    </div>
+
+
+         <!-- STEP 3 — Add-Ons  -->
+         
+    <div class="panel" id="panel3">
+      <h2 class="panel-title">Pick add-ons</h2>
+      <p  class="panel-sub">Add-ons help enhance your gaming experience.</p>
+
+      <div class="addon-item checked" data-name="Online service" data-mo="1" data-yr="10">
+        <div class="addon-checkbox">
+          <svg class="check-icon" width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="addon-text">
+          <div class="addon-name">Online service</div>
+          <div class="addon-desc">Access to multiplayer games</div>
+        </div>
+        <div class="addon-price">+$1/mo</div>
+      </div>
+
+      <div class="addon-item checked" data-name="Larger storage" data-mo="2" data-yr="20">
+        <div class="addon-checkbox">
+          <svg class="check-icon" width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="addon-text">
+          <div class="addon-name">Larger storage</div>
+          <div class="addon-desc">Extra 1TB of cloud save</div>
+        </div>
+        <div class="addon-price">+$2/mo</div>
+      </div>
+
+      <div class="addon-item" data-name="Customizable profile" data-mo="2" data-yr="20">
+        <div class="addon-checkbox">
+          <svg class="check-icon" width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="addon-text">
+          <div class="addon-name">Customizable profile</div>
+          <div class="addon-desc">Custom theme on your profile</div>
+        </div>
+        <div class="addon-price">+$2/mo</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back show" id="b3-back">Go Back</button>
+        <button class="btn-next"      id="b3-next">Next Step</button>
+      </div>
+    </div>
+
+   
+         <!-- STEP 4 — Summary / Finishing Up -->
+      
+    <div class="panel" id="panel4">
+      <h2 class="panel-title">Finishing up</h2>
+      <p  class="panel-sub">Double-check everything looks OK before confirming.</p>
+
+      <div class="summary-box">
+        <div class="summary-plan-row">
+          <div>
+            <div class="summary-plan-name" id="sum-plan-name">Arcade (Monthly)</div>
+            <span class="summary-change" id="sum-change">Change</span>
+          </div>
+          <div class="summary-plan-price" id="sum-plan-price">$9/mo</div>
+        </div>
+        <div id="sum-addons-list"></div>
+      </div>
+
+      <div class="summary-total-row">
+        <div class="summary-total-label" id="sum-total-label">Total (per month)</div>
+        <div class="summary-total-value" id="sum-total-value">+$12/mo</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back show" id="b4-back">Go Back</button>
+        <button class="btn-confirm"   id="b4-confirm">Confirm</button>
+      </div>
+    </div>
+
+
+         <!--  STEP 5 — Thank You  -->
+       
+    <div class="thankyou-panel" id="panel5">
+      <div class="ty-check">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+          <path d="M6 17L12.5 23.5L28 8" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h1>Thank you!</h1>
+      <p>Thanks for confirming your subscription! We hope you have fun using our platform. If you ever need support, please feel free to email us at support@loremgaming.com.</p>
+    </div>
+
+  </main>
+</div>
+
+
+     <!-- JAVASCRIPT -->
+   
+<script>
+(function () {
+
+  /* state  */
+  var yearly  = false;
+  var current = 1;
+  var chosen  = { name: 'Arcade', mo: 9, yr: 90 };
+
+  /*  helpers */
+  function byId(id)  { return document.getElementById(id); }
+  function qAll(sel) { return document.querySelectorAll(sel); }
+
+  /*  navigate  */
+  function goTo(n) {
+    /* hide all */
+    qAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    byId('panel5').classList.remove('active');
+
+    /* show target */
+    if (n === 5) {
+      byId('panel5').classList.add('active');
+    } else {
+      byId('panel' + n).classList.add('active');
+    }
+
+    /* update sidebar numerals */
+    for (var i = 1; i <= 4; i++) {
+      byId('sn' + i).classList.toggle('active', i === n);
+    }
+    current = n;
+  }
+
+
+    /* STEP 1 — Personal Info */
+    
+  byId('b1-next').addEventListener('click', function () {
+    var name  = byId('inp-name').value.trim();
+    var email = byId('inp-email').value.trim();
+    var phone = byId('inp-phone').value.trim();
+
+    byId('fg-name').classList.toggle('has-error',  !name);
+    byId('fg-email').classList.toggle('has-error', !email);
+    byId('fg-phone').classList.toggle('has-error', !phone);
+
+    if (name && email && phone) goTo(2);
+  });
+
+  /* clear errors on input */
+  byId('inp-name').addEventListener('input',  function(){ if(this.value.trim()) byId('fg-name').classList.remove('has-error'); });
+  byId('inp-email').addEventListener('input', function(){ if(this.value.trim()) byId('fg-email').classList.remove('has-error'); });
+  byId('inp-phone').addEventListener('input', function(){ if(this.value.trim()) byId('fg-phone').classList.remove('has-error'); });
+
+
+   /* STEP 2 — Select Plan */
+  /* plan card click */
+  qAll('.plan-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      qAll('.plan-card').forEach(function(c){ c.classList.remove('selected'); });
+      this.classList.add('selected');
+      chosen = {
+        name : this.dataset.plan,
+        mo   : parseInt(this.dataset.mo),
+        yr   : parseInt(this.dataset.yr)
+      };
+    });
+  });
+
+  /* billing toggle */
+  byId('billing-toggle').addEventListener('change', function () {
+    yearly = this.checked;
+
+    byId('lbl-mo').classList.toggle('active', !yearly);
+    byId('lbl-yr').classList.toggle('active',  yearly);
+    byId('planGrid').classList.toggle('yearly-mode', yearly);
+
+    /* update each plan card price */
+    qAll('.plan-card').forEach(function (card) {
+      card.querySelector('.plan-price').textContent =
+        yearly ? '$' + card.dataset.yr + '/yr'
+               : '$' + card.dataset.mo + '/mo';
+    });
+
+    /* update each addon price */
+    qAll('.addon-item').forEach(function (item) {
+      item.querySelector('.addon-price').textContent =
+        yearly ? '+$' + item.dataset.yr + '/yr'
+               : '+$' + item.dataset.mo + '/mo';
+    });
+  });
+
+  byId('b2-next').addEventListener('click', function () { goTo(3); });
+  byId('b2-back').addEventListener('click', function () { goTo(1); });
+
+
+   /* STEP 3 — Add-Ons */
+   
+  qAll('.addon-item').forEach(function (item) {
+    item.addEventListener('click', function () {
+      this.classList.toggle('checked');
+    });
+  });
+
+  byId('b3-next').addEventListener('click', function () {
+    buildSummary();
+    goTo(4);
+  });
+  byId('b3-back').addEventListener('click', function () { goTo(2); });
+
+
+    /* STEP 4 — Summary / Finishing Up */
+   
+  function buildSummary () {
+    var suf     = yearly ? '/yr' : '/mo';
+    var planAmt = yearly ? chosen.yr : chosen.mo;
+    var period  = yearly ? 'Yearly' : 'Monthly';
+
+    byId('sum-plan-name').textContent  = chosen.name + ' (' + period + ')';
+    byId('sum-plan-price').textContent = '$' + planAmt + suf;
+    byId('sum-total-label').textContent = 'Total (per ' + (yearly ? 'year' : 'month') + ')';
+
+    var html  = '';
+    var extra = 0;
+
+    qAll('.addon-item.checked').forEach(function (item) {
+      var amt = yearly ? parseInt(item.dataset.yr) : parseInt(item.dataset.mo);
+      extra  += amt;
+      html   += '<div class="summary-addon-row">'
+              + '<span class="summary-addon-name">'  + item.dataset.name  + '</span>'
+              + '<span class="summary-addon-price">+$' + amt + suf + '</span>'
+              + '</div>';
+    });
+
+    byId('sum-addons-list').innerHTML = html;
+
+    var total = planAmt + extra;
+    byId('sum-total-value').textContent = (yearly ? '$' : '+$') + total + suf;
+  }
+
+  byId('sum-change').addEventListener('click',  function () { goTo(2); });
+  byId('b4-back').addEventListener('click',     function () { goTo(3); });
+  byId('b4-confirm').addEventListener('click',  function () { goTo(5); });
+
+})();
+</script>
+</body>
+</html>
